@@ -21,9 +21,6 @@ const cargarCategorias = async (req, res = response) => {
 
     const categorias = await Frases.find({}).distinct('categoria');
 
-    console.log(categorias)
-
-
     const uniqueValues = Array.from(new Set(categorias.flatMap(str => str.split(' '))));
 
 
@@ -43,43 +40,21 @@ const array = [
 
 
 const getFrases = async (req, res) => {
-    // const { listWordsToSearch, typeOrder = 'aleatorio', fechaInicio, fechaFin, categoriaSeleccionada } = req.body;
 
-    // let query = {};
+    const { categoria, fechaInicio, fechaFin } = req.query;
 
-    // if (listWordsToSearch && listWordsToSearch.length > 0) {
-    //     const regexListWords = listWordsToSearch.map(word => new RegExp(word, 'i'));
+    console.log(categoria, fechaInicio, fechaFin);
 
-    //     query = {
-    //         ...query,
-    //         $or: [
-    //             { phraseEnglish: { $in: regexListWords } },
-         
-    //         ]
-    //     };
-    // }
-
-
-
-
-    // const [frases, count] = await Promise.all([
-
-    //     Frases.find(query),
-    //     Frases.countDocuments(query)
-    // ]);
-
-const {categoria } = req.query;
-
-const regex = new RegExp( categoria, 'i' );
+    const regex = new RegExp(categoria, 'i');
 
     const frases = await Frases.find({
-        categoria: regex
+        categoria: regex, insertDate: { $gte: fechaInicio, $lte: fechaFin }
 
-    }).limit(100);
+    });
 
     res.json({
-        ok: true,
-        frases
+        frases,
+
     });
 }
 
@@ -89,8 +64,8 @@ const regex = new RegExp( categoria, 'i' );
 const loadFrases = async (req, res = response) => {
     try {
         await Frases.deleteMany();
- 
-        
+
+
         const apiKey = process.env.apiKey;
         const spreadsheetId = process.env.spreadsheetId;
 
@@ -111,7 +86,7 @@ const loadFrases = async (req, res = response) => {
 
         // Insertar el array de dataClean en la base de datos
         await Frases.insertMany(dataClean);
-        await cargarCategorias();
+        //  await cargarCategorias();
 
         return res.json({
             ok: true,

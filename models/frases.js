@@ -29,6 +29,10 @@ const fraseSchema = new mongoose.Schema({
     audioPortuges: {
         type: String,
         required: false
+    },
+    insertDate: {
+        type: Date,
+        required: true
     }
 });
 
